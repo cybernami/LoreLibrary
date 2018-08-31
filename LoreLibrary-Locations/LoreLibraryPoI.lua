@@ -90,8 +90,6 @@ function _addon:ResetTabs()
 	LoreLibraryPoIInsetDetail.tabZone.selected:Hide();
 	LoreLibraryPoIInsetDetail.tabZone.unselected:Show();
 	LoreLibraryPoIInsetDetail.tabZone:UnlockHighlight();
-	print("ResetTabs")
-	print(LoreLibraryPoI.zone)
 	if self:ZoneIsCompleted(LoreLibraryPoI.zone) then
 		LoreLibraryPoIInsetDetail.tabZone:Enable();
 		LoreLibraryPoIInsetDetail.tabZone.unselected:SetDesaturated(false);
