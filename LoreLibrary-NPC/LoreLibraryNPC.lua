@@ -65,7 +65,7 @@ function LOLIB_NPCTabOnClick(self, button)
 		end
 	end
 	
-	PlaySound("igAbiliityPageTurn");
+	PlaySound(SOUNDKIT.IG_ABILITY_PAGE_TURN);
 end
 
 function LOLIB_CreatureFrame_OnClick(self)

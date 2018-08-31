@@ -638,7 +638,7 @@
 				<HighlightTexture file="Interface\BUTTONS\UI-Common-MouseHilight" alphaMode="ADD"/>
 				<Scripts>
 					<OnClick> 
-						PlaySound("igMainMenuOptionCheckBoxOn");
+						PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
 						Lib_ToggleDropDownMenu(1, nil, LoreLibraryCoreOptionsDropDown, "LoreLibraryCoreOptionsButton", -40, 0);
 					</OnClick>	
 				</Scripts>						
@@ -999,7 +999,7 @@
 				</Layers>
 				<Scripts>
 					<OnClick> 
-						PlaySound("igMainMenuOptionCheckBoxOn");
+						PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
 						Lib_ToggleDropDownMenu(1, nil, LoreLibraryListFilterDropDown, "LoreLibraryListFilterButton", 74, 15);
 					</OnClick>	
 				</Scripts>						

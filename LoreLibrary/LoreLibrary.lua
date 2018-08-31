@@ -351,8 +351,6 @@ end
 function _addon:ShowMapLorePoI(lore, location)
 	if (not lore or not location or location.sourceType == "container" or location.sourceType == "unavailable") then return; end
 
-	local width = WorldMapDetailFrame:GetWidth();
-	local height = WorldMapDetailFrame:GetHeight();
 	local sourceType = location.sourceType;
 	sourceType = (_sourceData[sourceType] and sourceType or "object");
 	
@@ -360,12 +358,17 @@ function _addon:ShowMapLorePoI(lore, location)
 	location.y = ((location.y and tonumber(location.y)) and location.y or -100);
 	
 	ShowUIPanel(WorldMapFrame);
+
+    for key, value in pairs(location) do
+        print('\t', key, value)
+    end
+	
 	SetMapByID(location.areaId);
 	if (location.level) then
 		SetDungeonMapLevel(location.level);
 	end
 	LoreLibraryMap.PoI:Show();
-	LoreLibraryMap.PoI:SetPoint("CENTER", LoreLibraryMap, "TOPLEFT", width * (location.x/100), -height * (location.y/100));
+	LoreLibraryMap.PoI:SetPoint("CENTER", LoreLibraryMap, "TOPLEFT", (location.x/100), (location.y/100));
 	LoreLibraryMap.PoI.icon:SetTexture(_sourceData[sourceType].icon);
 	LoreLibraryMap.PoI.title = lore.title;
 end
@@ -503,7 +506,7 @@ function _addon:ChangeDisplayPage(direction)
 	
 	if display.currentPage ~= lastPage then
 		self:SetDisplayText(self:FilterPageText(lore.pages[display.currentPage]))
-		PlaySound("igAbiliityPageTurn");
+		PlaySound(SOUNDKIT.IG_ABILITY_PAGE_TURN);
 	end
 	
 	self:UpdateListDisplayNavigation();
@@ -752,7 +755,7 @@ function _addon:UpdateBookDisplay(lore)
 			source:Show();
 			local sourceType = location.sourceType == nil and "object" or location.sourceType;
 			local texture = _sourceData[sourceType].icon;
-			local text = location.area;
+			local text = location.area.name;
 			local sourceType = _sourceData[sourceType].tooltip;
 
 			-- Disable button if source has no specific area (containers, unavailable, ...)
@@ -762,14 +765,14 @@ function _addon:UpdateBookDisplay(lore)
 			end
 			
 			if location.sourceType == "drop" or location.sourceType == "pickpocket" or location.sourceType == "vendor" or location.sourceType == "chest" then
-				text = string.format(_L["F_SOURCE"], location.source, location.area);
+				text = string.format(_L["F_SOURCE"], location.source, location.area.name);
 			elseif location.sourceType == "container" then
 			    text = location.source;
 			elseif location.sourceType == "unavailable" then
 			    text = _L["S_UNAVAILABLE_DETAIL"];
 				_addon:ShowLostPages();
 			elseif location.sourceType == "quest" then
-				text = string.format(_L["F_SOURCE"], location.source, location.area);
+				text = string.format(_L["F_SOURCE"], location.source, location.area.name);
 			elseif location.sourceType == "unknown" then
 			    text = _L["S_UNKNOWN_DETAIL"];
 			end
@@ -793,7 +796,7 @@ function _addon:UpdateBookDisplay(lore)
 	
 	self:UpdateListDisplayNavigation();
 	
-	display.soundHandle = select(2, PlaySound("igSpellBookOpen"));
+	display.soundHandle = select(2, PlaySound(SOUNDKIT.IG_SPELLBOOK_OPEN));
 end
 
 function _addon:ShowLostPages()
@@ -1405,12 +1408,12 @@ function _addon:InitCoreFrame()
 	table.insert(UISpecialFrames, "LoreLibraryCore")
 
 	LoreLibraryCore:SetScript("OnHide", function()
-							PlaySound("igCharacterInfoClose");
+							PlaySound(SOUNDKIT.IG_CHARACTER_INFO_CLOSE);
 							LoreLibraryList.suggestions:Hide();
 							CancelEmote();
 						end);
 	LoreLibraryCore:SetScript("OnShow", function()
-							PlaySound("igCharacterInfoOpen");
+							PlaySound(SOUNDKIT.IG_CHARACTER_INFO_OPEN);
 							_addon:PlayNewSuggestionAnimations()
 							DoEmote("READ", nil, true);
 							local poi = LoreLibrary:GetModule("PoI", true);
@@ -1437,7 +1440,7 @@ function _addon:InitCoreFrame()
 	LoreLibraryList.suggestBtn:SetScript("OnClick", function() 
 										if not InCombatLockdown() then
 											_addon:GetNewSuggestion();
-											PlaySound("igMainMenuOptionCheckBoxOn");
+											PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
 											if LoreLibraryList.suggestions:IsShown() then
 												LoreLibraryList.suggestions:Hide();
 											else
@@ -1612,10 +1615,6 @@ function _addon:InitMap()
 	LoreLibraryMap.overview:SetScript("OnDragStop", function(self)
 			LoreLibraryMap.overview:SetScript("OnUpdate", nil);
 			MoveMapOverview();
-		end)
-	
-	hooksecurefunc("WorldMap_ClearTextures", function() 
-			LoreLibraryMap.overview:SetScript("OnUpdate", nil);
 		end)
 		
 	Lib_UIDropDownMenu_Initialize(LolibOptionDropDown, function(self, level) _addon:InitMapOptionsDropdown(self, level) end, "MENU");
@@ -1814,11 +1813,11 @@ end
 _addon.events = CreateFrame("FRAME", "LoLib_EventFrame"); 
 _addon.events:RegisterEvent("ITEM_TEXT_BEGIN");
 _addon.events:RegisterEvent("ADDON_LOADED");
-_addon.events:RegisterEvent("WORLD_MAP_UPDATE");
+_addon.events:RegisterEvent("ZONE_CHANGED");
 _addon.events:RegisterEvent("PLAYER_REGEN_DISABLED");
 _addon.events:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
 
-function _addon.events:WORLD_MAP_UPDATE(loaded_addon)
+function _addon.events:ZONE_CHANGED(loaded_addon)
 	-- Only update when map is visible
 	if WorldMapFrame:IsShown() then
 		LoreLibrary:UpdateMapPins();
@@ -1850,7 +1849,7 @@ function _addon.events:ADDON_LOADED(loaded_addon)
 		for k, loc in ipairs(lore.locations) do
 			-- Get localized area names
 			if (loc.areaId) then
-				local area = GetMapNameByID(loc.areaId);
+				local area = C_Map.GetMapInfo(loc.areaId);
 				loc.area = area and area or "";
 			end
 			

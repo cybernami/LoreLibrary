@@ -1,3 +1,4 @@
+<!-- $Id: UIDropDownMenuTemplates.xml 22 2017-05-25 07:11:15Z arith-179865 $ -->
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
 	<Button name="Lib_UIDropDownMenuButtonTemplate" virtual="true">
@@ -112,7 +113,7 @@
 				</Scripts>
 				<NormalTexture file="Interface\ChatFrame\ChatFrameExpandArrow"/>
 			</Button>
-			<Button name="$parentInvisibleButton" hidden="true">
+			<Button name="$parentInvisibleButton" hidden="true" parentKey="invisibleButton">
 				<Anchors>
 					<Anchor point="TOPLEFT"/>
 					<Anchor point="BOTTOMLEFT"/>
@@ -158,7 +159,6 @@
 					local listFrame = _G["Lib_DropDownList"..level];
 					if ( not listFrame or not listFrame:IsShown() or select(2, listFrame:GetPoint()) ~= self ) then
 						Lib_ToggleDropDownMenu(self:GetParent():GetID() + 1, self.value, nil, nil, nil, nil, self.menuList, self);
-						listFrame:SetFrameLevel(self:GetParent():GetFrameLevel() + 1);
 					end
 				else
 					Lib_CloseDropDownMenus(self:GetParent():GetID() + 1);
@@ -169,7 +169,7 @@
 					if ( self.tooltipOnButton ) then
 						GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
 						GameTooltip:AddLine(self.tooltipTitle, 1.0, 1.0, 1.0);
-						GameTooltip:AddLine(self.tooltipText);
+						GameTooltip:AddLine(self.tooltipText, nil, nil, nil, true);
 						GameTooltip:Show();
 					else
 						GameTooltip_AddNewbieTip(self, self.tooltipTitle, 1.0, 1.0, 1.0, self.tooltipText, 1);
@@ -181,6 +181,12 @@
 				Lib_UIDropDownMenu_StartCounting(self:GetParent());
 				GameTooltip:Hide();
 			</OnLeave>
+			<OnEnable>
+				self.invisibleButton:Hide();
+			</OnEnable>
+			<OnDisable>
+				self.invisibleButton:Show();
+			</OnDisable>
 		</Scripts>
 		<ButtonText name="$parentNormalText">
 			<Anchors>
@@ -307,7 +313,7 @@
 					</Anchors>
 					<TexCoords left="0.8046875" right="1" top="0" bottom="1"/>
 				</Texture>
-				<FontString name="$parentText" inherits="GameFontHighlightSmall" wordwrap="false" justifyH="RIGHT">
+				<FontString parentKey="Text" name="$parentText" inherits="GameFontHighlightSmall" wordwrap="false" justifyH="RIGHT">
 					<Size>
 						<AbsDimension x="0" y="10"/>
 					</Size>
@@ -321,7 +327,7 @@
 				</FontString>
 			</Layer>
 			<Layer level="OVERLAY">
-				<Texture name="$parentIcon" hidden="true">
+				<Texture parentKey="Icon" name="$parentIcon" hidden="true">
 					<Size>
 						<AbsDimension x="16" y="16"/>
 					</Size>
@@ -334,7 +340,7 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<Button name="$parentButton"  motionScriptsWhileDisabled="true" >
+			<Button parentKey="Button" name="$parentButton" motionScriptsWhileDisabled="true" >
 				<Size>
 					<AbsDimension x="24" y="24"/>
 				</Size>
@@ -362,7 +368,7 @@
 					</OnLeave>
 					<OnClick>
 						Lib_ToggleDropDownMenu(nil, nil, self:GetParent());
-						PlaySound("igMainMenuOptionCheckBoxOn");
+						PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
 					</OnClick>
 				</Scripts>
 				<NormalTexture name="$parentNormalTexture" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up">

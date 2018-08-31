@@ -38,6 +38,8 @@ local BACKDROP_LIST_POINT = {
 local function SortZoneList(list, byContinent)
 	list = list and list or _addon.PoI["zones"];
 	table.sort(list, function(a, b) 
+			print(a)
+			print(b)
 			if (not byContinent or a.continent == b.continent) then
 				if (a.name == b.name) then
 					return a.id < b.id;
@@ -90,7 +92,8 @@ function _addon:ResetTabs()
 	LoreLibraryPoIInsetDetail.tabZone.selected:Hide();
 	LoreLibraryPoIInsetDetail.tabZone.unselected:Show();
 	LoreLibraryPoIInsetDetail.tabZone:UnlockHighlight();
-	
+	print("ResetTabs")
+	print(LoreLibraryPoI.zone)
 	if self:ZoneIsCompleted(LoreLibraryPoI.zone) then
 		LoreLibraryPoIInsetDetail.tabZone:Enable();
 		LoreLibraryPoIInsetDetail.tabZone.unselected:SetDesaturated(false);
@@ -119,13 +122,11 @@ function _addon:ShowMapPoI()
 	if (not point or point.unlocked) then
 		return;
 	end
-	local width = WorldMapDetailFrame:GetWidth();
-	local height = WorldMapDetailFrame:GetHeight();
 	
 	ShowUIPanel(WorldMapFrame);
 	SetMapByID(zoneId);
 	LoreLibraryMap.PoI:Show();
-	LoreLibraryMap.PoI:SetPoint("CENTER", LoreLibraryMap, "TOPLEFT", width * (point.x/100), -height * (point.y/100));
+	LoreLibraryMap.PoI:SetPoint("CENTER", LoreLibraryMap, "TOPLEFT", (point.x/100), (point.y/100));
 	LoreLibraryMap.PoI.icon:SetTexture("Interface/AddOns/LoreLibrary/Images/icon_PoI");
 	LoreLibraryMap.PoI.title = point.title;
 end
@@ -414,7 +415,6 @@ function _addon:UpdateZoneList()
 				else
 					button.selectedTexture:Hide();
 				end
-				
 				if (self:ZoneIsCompleted(zone)) then
 					button.completeIcon:Show();
 				end
@@ -598,7 +598,7 @@ function _addon:InitPoIFrame()
 		
 		--zone.pointIds = zone.pointIds and zone.pointIds or {};
 	
-		zone.name = GetMapNameByID(zone.id);
+		zone.name = C_Map.GetMapInfo(zone.id);
 		
 		
 		
@@ -743,7 +743,6 @@ function _addon:ShowPoIPopup(point, zoneId)
 	if not _addon.options.popups.poi then return end
 	
 	local zones = _addon.PoI["zones"];
-	
 	if self:ZoneIsCompleted(self:GetZoneById(zoneId)) then
 		ShowUIPanel(LoreLibraryPoIPopup.completed);
 	end
