@@ -38,8 +38,6 @@ local BACKDROP_LIST_POINT = {
 local function SortZoneList(list, byContinent)
 	list = list and list or _addon.PoI["zones"];
 	table.sort(list, function(a, b) 
-			print(a)
-			print(b)
 			if (not byContinent or a.continent == b.continent) then
 				if (a.name == b.name) then
 					return a.id < b.id;
