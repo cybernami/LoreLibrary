@@ -38,10 +38,13 @@ local BACKDROP_LIST_POINT = {
 local function SortZoneList(list, byContinent)
 	list = list and list or _addon.PoI["zones"];
 	table.sort(list, function(a, b) 
+			ViragDevTool_AddData(a, "SortZoneList a variable")
+			ViragDevTool_AddData(b, "SortZoneList b variable")
 			if (not byContinent or a.continent == b.continent) then
 				if (a.name == b.name) then
 					return a.id < b.id;
 				end
+
 				return a.name < b.name;
 			end
 			return a.continent < b.continent;
@@ -80,7 +83,7 @@ function LOLIB_PoITabOnClick(self, button)
 		return;
 	end
 	
-	PlaySound("igAbiliityPageTurn");
+	PlaySound(SOUNDKIT.IG_ABILITY_PAGE_TURN);
 end
 
 function _addon:ResetTabs()
@@ -90,6 +93,8 @@ function _addon:ResetTabs()
 	LoreLibraryPoIInsetDetail.tabZone.selected:Hide();
 	LoreLibraryPoIInsetDetail.tabZone.unselected:Show();
 	LoreLibraryPoIInsetDetail.tabZone:UnlockHighlight();
+	print("ResetTabs")
+	print(LoreLibraryPoI.zone)
 	if self:ZoneIsCompleted(LoreLibraryPoI.zone) then
 		LoreLibraryPoIInsetDetail.tabZone:Enable();
 		LoreLibraryPoIInsetDetail.tabZone.unselected:SetDesaturated(false);
@@ -594,7 +599,7 @@ function _addon:InitPoIFrame()
 		
 		--zone.pointIds = zone.pointIds and zone.pointIds or {};
 	
-		zone.name = C_Map.GetMapInfo(zone.id);
+		zone.mapinfo = C_Map.GetMapInfo(zone.id);
 		
 		
 		
@@ -708,15 +713,12 @@ function _addon:GetPointsFromZoneId(zoneId, ignoreLevel)
 	local list = {};
 	local zones = _addon.PoI["zones"];
 	local points = _addon.PoI["points"];	
-	local level = GetCurrentMapDungeonLevel();
 	
 	for k, zone in ipairs(zones) do
 		if (zone.id == zoneId) then
 			if (not zone.pointIds) then return {}; end
 			for pk, id in ipairs(zone.pointIds) do
-				if (ignoreLevel or (not points[id].level and (level == 0 or level == 1)) or points[id].level == level) then
-					table.insert(list, points[id]);
-				end
+				table.insert(list, points[id]);
 			end
 			return list;
 		end
@@ -753,28 +755,26 @@ function _addon:FrameUpdate(elapsed)
 	self.updateFrame.counter = self.updateFrame.counter + elapsed;
 	if (self.updateFrame.counter > self.updateFrame.interval) then
 		self.updateFrame.counter = self.updateFrame.counter - self.updateFrame.interval;
-		local x, y = GetPlayerMapPosition("player");
+		local x, y = C_Map.GetPlayerMapPosition(C_Map.GetBestMapForUnit("player"), "player"):GetXY();
 		local output = "#Map pins: " .. #LoreLibraryMap.pins;
-		local mLevel = GetCurrentMapDungeonLevel();
 		if (not IsFlying() and (x ~= self.updateFrame.playerX or y ~= self.updateFrame.playerY)) then
 			self.updateFrame.playerX = x;
 			self.updateFrame.playerY = y;
-			local zoneId = GetCurrentMapAreaID();
+			local zoneId = C_Map.GetBestMapForUnit("player");
 			if (self.updateFrame.zoneId ~= zoneId) then
 				self.updateFrame.zoneId = zoneId;
 				self.updateFrame.relevantPoints = self:GetPointsFromZoneId(zoneId, true);
 			end
 		end
 		
-		output = output .. "\nZone: " .. self.updateFrame.zoneId .. "   Level: " .. mLevel .."\n# Points: " .. #self.updateFrame.relevantPoints;
+		output = output .. "\nZone: " .. self.updateFrame.zoneId .. "\n# Points: " .. #self.updateFrame.relevantPoints;
 		for k, point in ipairs(self.updateFrame.relevantPoints) do
 			-- get aspect ratio of the map, otherwise the region around the point is a oval
 			local aspectRatio = 0.44;
 			local distance = math.sqrt(math.pow(self.updateFrame.playerX - (point.x / 100), 2)/aspectRatio + math.pow(self.updateFrame.playerY - (point.y / 100), 2));
-			local pLevel = (point.level and point.level or 1);
 			
 			local scaledReqDistance = (point.scale and point.scale * _L["N_DISTANCE_POINT_UNLOCK"] or _L["N_DISTANCE_POINT_UNLOCK"]);
-			if ((mLevel == 0 or pLevel == mLevel) and not point.unlocked and distance < scaledReqDistance) then
+			if not point.unlocked and distance < scaledReqDistance then
 				table.insert(LoreLibrary.db.global.unlockedPoI, point.id);
 				point.unlocked = true;
 				_addon:ShowPoIPopup(point, self.updateFrame.zoneId);

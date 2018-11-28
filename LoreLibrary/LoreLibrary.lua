@@ -18,6 +18,7 @@ LOLIB_ZONE_COMPLETE =			_L["S_ZONE_COMPLETE"];
 LOLIB_TITLE_DOCUMENT =			_L["S_TITLE_DOCUMENT"];
 
 local LoreLibrary = LibStub("AceAddon-3.0"):NewAddon("LoreLibrary");
+local HBDMigrate = LibStub("HereBeDragons-Migrate")
 
 local _LDB = LibStub("LibDataBroker-1.1"):NewDataObject(_addonName, {
 	type = "launcher",
@@ -44,7 +45,7 @@ local _defaults = {
 		favorites = {},
 		options = {
 			version = "",
-			showMapOverlay = true,
+			showMapOverlay = false,
 			showTooltipText = true,
 			mapOverviewAnchor = "BOTTOMLEFT",
 			poI = {
@@ -750,12 +751,15 @@ function _addon:UpdateBookDisplay(lore)
 	else
 		display.pageText:SetText(_L["S_SOURCE_TITLE"]);
 		for k, location in ipairs(lore.locations) do
+			ViragDevTool_AddData(location, "UpdateBookDisplay location variable")
 			display.sources:Show();
 			local source = display.sources["s"..k];
 			source:Show();
 			local sourceType = location.sourceType == nil and "object" or location.sourceType;
 			local texture = _sourceData[sourceType].icon;
-			local text = location.area.name;
+			local text
+			
+			text = location.area;
 			local sourceType = _sourceData[sourceType].tooltip;
 
 			-- Disable button if source has no specific area (containers, unavailable, ...)
@@ -765,14 +769,14 @@ function _addon:UpdateBookDisplay(lore)
 			end
 			
 			if location.sourceType == "drop" or location.sourceType == "pickpocket" or location.sourceType == "vendor" or location.sourceType == "chest" then
-				text = string.format(_L["F_SOURCE"], location.source, location.area.name);
+				text = string.format(_L["F_SOURCE"], location.source, location.area);
 			elseif location.sourceType == "container" then
 			    text = location.source;
 			elseif location.sourceType == "unavailable" then
 			    text = _L["S_UNAVAILABLE_DETAIL"];
 				_addon:ShowLostPages();
 			elseif location.sourceType == "quest" then
-				text = string.format(_L["F_SOURCE"], location.source, location.area.name);
+				text = string.format(_L["F_SOURCE"], location.source, location.area);
 			elseif location.sourceType == "unknown" then
 			    text = _L["S_UNKNOWN_DETAIL"];
 			end
@@ -1144,14 +1148,14 @@ function _addon:InitOptions(self, level)
 	info.keepShownOnClick = true;	
 
 	if (level == 1) then
-		info.text = _L["S_OPTIONS_MINIMAP"];
-		info.func = function(_, _, _, value)
-						_addon.options.minimap.hide = not value;
-						_addon:UpdateOptions();
-					end 
-		info.checked = function() return not _addon.options.minimap.hide end;
-		info.isNotRadio = true;
-		Lib_UIDropDownMenu_AddButton(info, level)
+		-- info.text = _L["S_OPTIONS_MINIMAP"];
+		-- info.func = function(_, _, _, value)
+						-- _addon.options.minimap.hide = not value;
+						-- _addon:UpdateOptions();
+					-- end 
+		-- info.checked = function() return not _addon.options.minimap.hide end;
+		-- info.isNotRadio = true;
+		-- Lib_UIDropDownMenu_AddButton(info, level)
 
 		info.text = _L["S_OPTIONS_TOOLTIP"];
 		info.func = function(_, _, _, value)
@@ -1161,14 +1165,14 @@ function _addon:InitOptions(self, level)
 		info.isNotRadio = true;
 		Lib_UIDropDownMenu_AddButton(info, level)
 		
-		info.text = _L["S_OPTIONS_WORLDMAP_OVERLAY"];
-		info.func = function(_, _, _, value)
-						_addon.options.showMapOverlay = value;
-						_addon:UpdateOptions();
-					end 
-		info.checked = function() return _addon.options.showMapOverlay end;
-		info.isNotRadio = true;
-		Lib_UIDropDownMenu_AddButton(info, level)
+		-- info.text = _L["S_OPTIONS_WORLDMAP_OVERLAY"];
+		-- info.func = function(_, _, _, value)
+						-- _addon.options.showMapOverlay = value;
+						-- _addon:UpdateOptions();
+					-- end 
+		-- info.checked = function() return _addon.options.showMapOverlay end;
+		-- info.isNotRadio = true;
+		-- Lib_UIDropDownMenu_AddButton(info, level)
 		
 		info.checked = 	nil;
 		info.isNotRadio = nil;
@@ -1266,17 +1270,17 @@ function _addon:InitOptions(self, level)
 end
 
 function _addon:UpdateOptions()
-	if (LoreLibrary.db.global.options.minimap.hide) then
-		_icon:Hide(_addonName);
-	else
-		_icon:Show(_addonName);
-	end
+	-- if (LoreLibrary.db.global.options.minimap.hide) then
+		-- _icon:Hide(_addonName);
+	-- else
+		-- _icon:Show(_addonName);
+	-- end
 	
-	if (LoreLibrary.db.global.options.showMapOverlay) then
-		LoreLibraryMap:Show();
-	else
-		LoreLibraryMap:Hide();
-	end
+	-- if (LoreLibrary.db.global.options.showMapOverlay) then
+		-- LoreLibraryMap:Show();
+	-- else
+		-- LoreLibraryMap:Hide();
+	-- end
 end
 
 function _addon:InitMapOptionsDropdown(self, level)
@@ -1605,17 +1609,17 @@ function _addon:InitMap()
 					_addon:StopPinAnimations();
 				end)	
 	
-	LoreLibraryMap.overview:SetScript("OnDragStart", function(self) 
-			self:SetScript("OnUpdate", function(drag) 
-					drag:Show();
-					MoveMapOverview(false);
-				end);
-		end );
+	--LoreLibraryMap.overview:SetScript("OnDragStart", function(self) 
+	--		self:SetScript("OnUpdate", function(drag) 
+	--				drag:Show();
+	--				MoveMapOverview(false);
+	--			end);
+	--	end );
 	
-	LoreLibraryMap.overview:SetScript("OnDragStop", function(self)
-			LoreLibraryMap.overview:SetScript("OnUpdate", nil);
-			MoveMapOverview();
-		end)
+	--LoreLibraryMap.overview:SetScript("OnDragStop", function(self)
+	--		LoreLibraryMap.overview:SetScript("OnUpdate", nil);
+	--		MoveMapOverview();
+	--	end)
 		
 	Lib_UIDropDownMenu_Initialize(LolibOptionDropDown, function(self, level) _addon:InitMapOptionsDropdown(self, level) end, "MENU");
 	-- LolibOptionDropDown.initialize = function(self, level) _addon:InitMapOptionsDropdown(self, level) end
@@ -1623,9 +1627,9 @@ function _addon:InitMap()
 	lore.icon:SetTexture("Interface\\AddOns\\LoreLibrary\\Images\\icon_Object");
 	poi.icon:SetTexture("Interface\\AddOns\\LoreLibrary\\Images\\icon_PoI");
 	
-	if (not LoreLibrary.db.global.options.showMapOverlay) then
-		LoreLibraryMap:Hide();
-	end
+	--if (not LoreLibrary.db.global.options.showMapOverlay) then
+	--	LoreLibraryMap:Hide();
+	--end
 end
 
 function _addon:SearchChanged(searchBox)
@@ -1847,10 +1851,12 @@ function _addon.events:ADDON_LOADED(loaded_addon)
 	local terms = _addon.data.terms;
 	for k, lore in pairs(_data) do
 		for k, loc in ipairs(lore.locations) do
+			--BFA Map changes migrationtool from HereBeDragons-Migrate
+			local newMapID = HBDMigrate:GetUIMapIDFromMapAreaId(loc.areaId);
 			-- Get localized area names
-			if (loc.areaId) then
-				local area = C_Map.GetMapInfo(loc.areaId);
-				loc.area = area and area or "";
+			if (newMapID) then
+				local area = C_Map.GetMapInfo(newMapID);
+				loc.area = area.name and area.name or "";
 			end
 			
 			if loc.id then

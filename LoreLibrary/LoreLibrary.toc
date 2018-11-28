@@ -5,14 +5,24 @@
 ## Version: 7.0.04
 ## SavedVariables: LoLibDB
 
+
+
+libs\HereBeDragons\HereBeDragons-2.0.lua
+libs\HereBeDragons\HereBeDragons-Pins-2.0.lua
+libs\HereBeDragons\HereBeDragons-Migrate.lua
+
 Locals.lua
 ItemData.lua
-Localization/deDE.lua
-Localization/ruRU.lua
-Localization/frFR.lua
-Localization/esES.lua
-Localization/ptBR.lua
-Localization/itIT.lua
+Localization\deDE.lua
+Localization\ruRU.lua
+Localization\frFR.lua
+Localization\esES.lua
+Localization\ptBR.lua
+Localization\itIT.lua
+
+#@no-lib-strip@
+embeds.xml
+#@end-no-lib-strip@
 
 LoreLibrary.xml
 
